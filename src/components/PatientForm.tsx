@@ -1,14 +1,44 @@
 import { useForm } from "react-hook-form";
 import { Error } from "./Error";
+import { DraftPatient } from "../types";
+import { usePatientStore } from "../store";
+import { useEffect } from "react";
+import {toast} from 'react-toastify'
 
 export const PatientForm = () => {
+  const { addPatient, activeId, patients, updatePatients } = usePatientStore();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    reset,
+    setValue,
+  } = useForm<DraftPatient>();
 
-  const registerPacient = () => {};
+  const registerPacient = (data: DraftPatient) => {
+    if (activeId) {
+      updatePatients(data);
+      toast.success('Paciente Actualizado Correctamente')
+    } else {
+      addPatient(data);
+      toast.success('Paciente Registrado Correctamente')
+    }
+    reset();
+  };
+
+  useEffect(() => {
+    if (activeId) {
+      const activePatient = patients.filter(
+        (patient) => patient.id === activeId
+      )[0];
+      setValue("name", activePatient.name);
+      setValue("caretaker", activePatient.caretaker);
+      setValue("email", activePatient.email);
+      setValue("date", activePatient.date);
+      setValue("symptoms", activePatient.symptoms);
+    }
+  }, [activeId]);
 
   return (
     <div className="md:w-1/2 lg:w-2/5 mx-5">
@@ -37,7 +67,7 @@ export const PatientForm = () => {
               required: "El nombre del Paciente es Obligatorio!!",
             })}
           />
-          {errors.name && <Error>{errors.name?.message?.toString()}</Error>}
+          {errors.name && <Error>{errors.name?.message}</Error>}
         </div>
 
         <div className="mb-5">
@@ -53,9 +83,7 @@ export const PatientForm = () => {
               required: "El Propietario es Obligatorio!!",
             })}
           />
-          {errors.caretaker && (
-            <Error>{errors.caretaker?.message?.toString()}</Error>
-          )}
+          {errors.caretaker && <Error>{errors.caretaker?.message}</Error>}
         </div>
 
         <div className="mb-5">
@@ -75,7 +103,7 @@ export const PatientForm = () => {
               },
             })}
           />
-          {errors.email && <Error>{errors.email?.message?.toString()}</Error>}
+          {errors.email && <Error>{errors.email?.message}</Error>}
         </div>
 
         <div className="mb-5">
@@ -87,12 +115,10 @@ export const PatientForm = () => {
             className="w-full p-3  border border-gray-100"
             type="date"
             {...register("date", {
-                required: "La fecha de alta es Obligatoria!!",
-              })}
-            />
-            {errors.date && (
-              <Error>{errors.date?.message?.toString()}</Error>
-            )}
+              required: "La fecha de alta es Obligatoria!!",
+            })}
+          />
+          {errors.date && <Error>{errors.date?.message}</Error>}
         </div>
 
         <div className="mb-5">
@@ -104,12 +130,10 @@ export const PatientForm = () => {
             className="w-full p-3  border border-gray-100"
             placeholder="Síntomas del paciente"
             {...register("symptoms", {
-                required: "Los sintomas son Obligatorios!!",
-              })}
-            />
-            {errors.symptoms && (
-              <Error>{errors.symptoms?.message?.toString()}</Error>
-            )}
+              required: "Los sintomas son Obligatorios!!",
+            })}
+          />
+          {errors.symptoms && <Error>{errors.symptoms?.message}</Error>}
         </div>
 
         <input
